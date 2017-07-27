@@ -10,7 +10,7 @@ tags: Shell Python
 * content
 {:toc}
 
->尝试编写的第一个shell小程序，可以用Github上python库`you-get`来批量下载bilibili网站上的视频。
+>尝试编写的第一个shell小程序，可以用Github上python库you-get来批量下载bilibili网站上的视频。
 
 
 
@@ -28,7 +28,7 @@ tags: Shell Python
     while [ ${var} -le 28972 ]
     do
         you-get https://bangumi.bilibili.com/anime/1564/play#${var}
-        var=$[$var + 1]
+        var=$(($var + 1))
     done
     cd ..
 
@@ -40,7 +40,7 @@ tags: Shell Python
     while [ ${var} -le 50535 ]
     do
         you-get https://bangumi.bilibili.com/anime/2261/play#${var}
-        var=$[$var + 1]
+        var=$(($var + 1))
     done
     cd ..
 
@@ -52,7 +52,7 @@ tags: Shell Python
     while [ ${var} -le 30897 ]
     do
         you-get https://bangumi.bilibili.com/anime/1715/play#${var}
-        var=$[$var + 1]
+        var=$(($var + 1))
     done
     cd ..
 
@@ -63,7 +63,7 @@ tags: Shell Python
     while [ ${var} -le 64212 ]
     do
         you-get https://bangumi.bilibili.com/anime/836/play#${var}
-        var=$[$var + 1]
+        var=$(($var + 1))
     done
     cd ..
 
