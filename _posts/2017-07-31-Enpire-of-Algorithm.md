@@ -1,7 +1,7 @@
 ---
 layout: post
 author: Ding
-title:  "计算机算法怎样改变人类"
+title:  "算法帝国"
 date:   2017-07-31 
 categories: Reading
 tags: 
