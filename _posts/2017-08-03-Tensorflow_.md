@@ -2,9 +2,9 @@
 layout: post
 author: Ding
 title: TensorFlow简介
-date: 2017-08-01T00:00:00.000Z
-categories: Reading
-tags: Algorithm
+date: 2017-08-03T00:00:00.000Z
+categories: Python
+tags: TensorFlow
 ---
 
 * content
@@ -33,7 +33,7 @@ tags: Algorithm
 |Theano|蒙特利尔大学|Python|Linux、Mac OS X、Windows|
 |TensorFlow|Google|C++、Python|Linux、Mac OS X、Windows、Android、iOS|
 
-## TensorFlow的计算图模型
+## 计算图模型
 
 
 Tensor就是张量，可以简单理解为多维数组，表示了TensorFlow的数据结构。Flow是“流”，表示TensorFlow的计算模型，体现的是张量之间通过计算相互转化的过程。
@@ -73,7 +73,7 @@ TensorFlow是一个通过计算图来描述计算过程的变成系统。TensorF
       result = a + b
   ```
 
-## TensorFlowd中的张量数据模型
+## 张量数据模型
 
 
 在TensorFlow中所有数据都通过张量的形式表示，张量可以理解为多维数组。其中零阶张量表示标量，即一个数；第一阶张量表示为向量，即一个一维数组；第n阶张量可以理解为一个n维数组。
@@ -102,7 +102,7 @@ TensorFlow是一个通过计算图来描述计算过程的变成系统。TensorF
   tf.Session().run(a + b)
 ```
 
-## TensorFlow的运行模型---会话 Session
+## 会话运行模型---Session
 
 
 ### 开始和关闭会话
