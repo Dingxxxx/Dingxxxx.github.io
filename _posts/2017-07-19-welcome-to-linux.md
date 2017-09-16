@@ -2,7 +2,7 @@
 layout: post
 author: Ding
 title:  "Welcome to Linux"
-date:   2017-07-19 
+date:   2017-07-19
 categories: Linux
 tags: Linux Ubuntu
 ---
@@ -63,11 +63,11 @@ apt工具可以通过`/etc/apt/source.list`从远程源服务器下载程序并�
 
 - 升级系统
 
-        sudo apt-get dist-upgrade 
+        sudo apt-get dist-upgrade
 
 - 安装软件
 
-        sudo apt-get install <package> 
+        sudo apt-get install <package>
 
 - 缺失依赖时修复
 
@@ -75,22 +75,22 @@ apt工具可以通过`/etc/apt/source.list`从远程源服务器下载程序并�
 
 - 移除软件
 
-        sudo apt-get remove <package> 
+        sudo apt-get remove <package>
 
 - 移除软件和配置文件
 
-        sudo apt-get remove --purge <package> 
+        sudo apt-get remove --purge <package>
 
 - 移除软件及其依赖和配置文件
 
-        sudo apt-get autoremove --purge <package> 
+        sudo apt-get autoremove --purge <package>
 
 ### Synaptic Package Manager
 
 新立得软件包管理器是dpkg命令的图形化前端，能够在图形界面内完成LINUX系统软件的搜寻、安装和删除，相当于终端里的apt命令。使用新立得软件包管理器的同时不能使用终端安装软件，因为它们实质上是一样的。
 
 - 安装新立得软件包管理器
-        
+
         sudo apt-get install synaptic
 
 
@@ -99,12 +99,12 @@ apt工具可以通过`/etc/apt/source.list`从远程源服务器下载程序并�
 
 - 安装受限制的解码器
     包括解码器、flashplayer、java虚拟机、微软的Truetype字体等受限代码。
-        
+
         sudo apt-get install ubuntu-restricted-extras
-    
+
 - 搜狗输入法
 
-        sudo apt-get install sogoupinyin 
+        sudo apt-get install sogoupinyin
 
 - JDK
     JRE是运行Java需要的最基本的环境包，JDK是进行Java开发所需要的完整工具包，有开源的OpenJDK和官方的OracleJDK两个版本，选择安装OpenJDK。
@@ -113,7 +113,7 @@ apt工具可以通过`/etc/apt/source.list`从远程源服务器下载程序并�
 
 - Chrome
 
-        sudo apt-get install google-chrome-stable 
+        sudo apt-get install google-chrome-stable
 
 - 安装TLP管理笔记本电池寿命
 
@@ -146,15 +146,15 @@ apt工具可以通过`/etc/apt/source.list`从远程源服务器下载程序并�
 - touchpad-indicator
     笔记本触摸板太过灵敏，在使用键盘时经常勿碰，可以用这个插件方便的开关触摸板，并设置插入鼠标时自动禁用触摸板。
 
-        sudo add-apt-repository ppa:lorenzo-carbonell/atareao 
-        sudo apt-get update 
-        sudo apt-get install touchpad-indicator 
+        sudo add-apt-repository ppa:lorenzo-carbonell/atareao
+        sudo apt-get update
+        sudo apt-get install touchpad-indicator
 
 - Latex
     参考自http://blog.csdn.net/miaoqiucheng/article/details/53082326。
 - GIMP
 
-        sudo apt-get install gimp 
+        sudo apt-get install gimp
 
 - VLC媒体播放器
 
@@ -169,11 +169,11 @@ apt工具可以通过`/etc/apt/source.list`从远程源服务器下载程序并�
 
 - steam
 
-        sudo apt-get install steam 
+        sudo apt-get install steam
 
 - 网易云播放器
 
-        sudo apt install netease-cloud-music 
+        sudo apt install netease-cloud-music
 
 - 微信
 - Xmind
@@ -207,7 +207,7 @@ apt工具可以通过`/etc/apt/source.list`从远程源服务器下载程序并�
 shadowsocks是一种基于Socks5代理方式的网络数据加密传输包，并采用Apache许可证、GPL、MIT许可证等多种自由软件许可协议开放源代码。shadowsocks分为服务器端和客户端，在使用之前，需要先将服务器端部署到服务器上面，然后通过客户端连接并创建本地代理。
 
 - 服务器端
-    
+
     使用网上别人提供的服务器。
 
 - 客户端
