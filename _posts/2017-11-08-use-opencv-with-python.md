@@ -23,9 +23,9 @@ tags:
 
 
 
-## Install opencv
+## 安装opencv并配置环境
 
-### 通过apt
+### 通过apt安装opencv
 
 在Linux中安装OpenCV是非常方便的，大多数Linux的发行版都支持包管理器的安装，比如在Ubuntu 16.04 LTS中，只需要在终端中输入：
 
@@ -33,8 +33,7 @@ tags:
 sudo apt install libopencv-dev python-opencv
 ```
 
-
-### 通过源码
+### 通过源码编译opencv
 当然也可以通过官网下载源码编译安装，第一步先安装各种依赖：
 https://docs.opencv.org/3.3.1/dd/dd5/tutorial_py_setup_in_fedora.html
 
@@ -46,7 +45,7 @@ sudo apt install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-d
 sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
 ```
 
-去opencv的官网 https://opencv.org/ 下载最新版本的opencv，进入下载好的opencv文件夹：
+去opencv的官网[https://opencv.org/]下载最新版本的opencv，进入下载好的opencv文件夹：
 
 ```
 mkdir release
@@ -55,12 +54,11 @@ cd release
 
 cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
 ```
-出错了，
+结果IPPICV报错。
 
-#### 自行下载
+#### 自行下载第三方库
 
-https://github.com/opencv/opencv_3rdparty/branches/all
-可以到这里找到出错的ippicv(并行计算库)，下载下来。
+可以到Github上[https://github.com/opencv/opencv_3rdparty/branches/all]找到出错的ippicv(并行计算库)，下载下来。
 
 下载文件的地方位置在.cache/ippicv下，带md5的文件名字，需要把ippicv_2017u3_lnx_intel64_general_20170822.tgz前面加上md5
 
@@ -75,7 +73,6 @@ ipp_file=ippicv_2017u3_lnx_intel64_general_20170822.tgz &&ipp_hash=$(md5sum ../$
 放好ippicv后可以重新cmake
 
 #### 忽略 IPPICV
-
 
 
 编译并安装
@@ -96,7 +93,7 @@ conda install -c https://conda.binstar.org/menpo opencv
 
 ```python
 import cv2
-cv2.__version__
+print(cv2.__version__)
 ```
 
 
