@@ -34,7 +34,7 @@ sudo apt install libopencv-dev python-opencv
 ```
 
 
-###　通过源码
+### 通过源码
 当然也可以通过官网下载源码编译安装，第一步先安装各种依赖：
 https://docs.opencv.org/3.3.1/dd/dd5/tutorial_py_setup_in_fedora.html
 
