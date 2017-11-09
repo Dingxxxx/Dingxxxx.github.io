@@ -45,7 +45,7 @@ sudo apt install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-d
 sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
 ```
 
-去opencv的官网[https://opencv.org/]下载最新版本的opencv，进入下载好的opencv文件夹：
+去opencv的[官网](https://opencv.org/)下载最新版本的opencv，进入下载好的opencv文件夹：
 
 ```
 mkdir release
@@ -58,7 +58,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
 
 #### 自行下载第三方库
 
-可以到Github上[https://github.com/opencv/opencv_3rdparty/branches/all]找到出错的ippicv(并行计算库)，下载下来。
+可以到[Github](https://github.com/opencv/opencv_3rdparty/branches/all)上找到出错的ippicv(并行计算库)，下载下来。
 
 下载文件的地方位置在.cache/ippicv下，带md5的文件名字，需要把ippicv_2017u3_lnx_intel64_general_20170822.tgz前面加上md5
 
@@ -100,6 +100,6 @@ print(cv2.__version__)
 
 ### 基本使用
 
-https://zhuanlan.zhihu.com/p/24425116
+[知乎](https://zhuanlan.zhihu.com/p/24425116)
 
-https://segmentfault.com/a/1190000003742422
+[教程](https://segmentfault.com/a/1190000003742422)
