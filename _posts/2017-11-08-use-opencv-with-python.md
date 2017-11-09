@@ -34,8 +34,9 @@ sudo apt install libopencv-dev python-opencv
 ```
 
 ### 通过源码编译opencv
-当然也可以通过官网下载源码编译安装，第一步先安装各种依赖：
-https://docs.opencv.org/3.3.1/dd/dd5/tutorial_py_setup_in_fedora.html
+当然也可以通过[官网](https://opencv.org/)下载最新版本的opencv源码编译安装，第一步先安装各种依赖：
+
+参考这个官网给出的[安装步骤](https://docs.opencv.org/3.3.1/dd/dd5/tutorial_py_setup_in_fedora.html)
 
 ```
 sudo apt install build-essential
@@ -45,7 +46,7 @@ sudo apt install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-d
 sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
 ```
 
-去opencv的[官网](https://opencv.org/)下载最新版本的opencv，进入下载好的opencv文件夹：
+进入下载好的opencv文件夹：
 
 ```
 mkdir release
