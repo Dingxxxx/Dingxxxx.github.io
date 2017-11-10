@@ -12,7 +12,10 @@ tags:
 * content
 {:toc}
 
+
 > opencv-python中使用cv2.destroyAllWindows()来关闭窗口时会出现程序崩溃的问题，找了很多方法，目前最好的解决策略是这样的。
+
+
 
 
 
