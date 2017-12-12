@@ -5,7 +5,7 @@ title: 安装Python版本的opencv
 date: 2017-11-08
 categories: opencv
 tags:
-- 机器学期
+- 机器学习
 - opencv
 - python
 ---
@@ -90,6 +90,7 @@ sudo make install
 ### 通过Anaconda安装
 
 ```
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
 conda install -c https://conda.binstar.org/menpo opencv
 ```
 ## 测试
