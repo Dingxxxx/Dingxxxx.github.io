@@ -20,7 +20,7 @@ tags:
 
 ## 概览
 
-![游戏截图](images/T-rex/demo.png)
+![游戏截图](/images/T-rex/demo.png)
 
 游戏截面为 600X150 像素，主要包括五个构造函数：
 
@@ -36,7 +36,7 @@ tags:
 
 游戏所有的资源都在 1233X68 的Sprite图中。
 
-![sprite图](images/T-rex/sprite.png)
+![sprite图](/images/T-rex/sprite.png)
 
 ## 地面 HorizonLine
 
