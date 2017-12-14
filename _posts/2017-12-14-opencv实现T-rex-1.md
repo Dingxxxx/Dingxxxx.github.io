@@ -1,7 +1,7 @@
 ---
 layout: post
 author: Ding
-title: 用opencv实现chrome浏览器离线小游戏T-rex
+title: 用opencv实现chrome浏览器离线小游戏T-rex(一)
 date: 2017-12-14
 categories: Python
 tags:
@@ -12,13 +12,15 @@ tags:
 * content
 {:toc}
 
-> T-rex是Chrome浏览器自带的离线小游戏，研究了一下它的源码，并尝试用Opencv复现。参考了[博客](http://www.cnblogs.com/undefined000/p/trex_1.html)。
+> T-rex是Chrome浏览器自带的离线小游戏，研究了一下它的源码，并尝试用Opencv复现。
+>
+> 参考了[博客](http://www.cnblogs.com/undefined000/p/trex_1.html)。
 
 
 
 ## 概览
 
-![游戏截图](/home/ding/Documents/git/Dingxxxx.github.io/images/T-rex/demo.png)
+![游戏截图](images/T-rex/demo.png)
 
 游戏截面为 600X150 像素，主要包括五个构造函数：
 
@@ -34,11 +36,12 @@ tags:
 
 游戏所有的资源都在 1233X68 的Sprite图中。
 
-![sprite图](/home/ding/Documents/git/Dingxxxx.github.io/images/T-rex/sprite.png)
+![sprite图](images/T-rex/sprite.png)
 
 ## 地面 HorizonLine
 
 HorizonLine在sprite图中的位置为 2:1202, 54:66 的矩形范围，可以分为 2:602, 602:1202两种不同的地形。
+
 绘制思路为记录2个600长度的路段范围，判断当前窗口在路段范围的位置，根据绘制两帧的时间间隔更新移动范围。
 
 ```python
