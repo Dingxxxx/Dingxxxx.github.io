@@ -83,7 +83,7 @@ class Clouds:
 ```python
 if __name__ == '__main__':
 
-    sprite = cv2.imread('/home/ding/Downloads/t-rex.png')
+    sprite = cv2.imread('t-rex.png')
     canvas = np.ones((150,600,3), np.uint8) * 255
 
     #cv2.namedWindow('b', cv2.WINDOW_NORMAL)
