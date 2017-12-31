@@ -195,7 +195,7 @@ select pgr_createTopology('chengdu',0.01,source:='source',id:='gid',target:='tar
 
 ### 最短路径查询
 
-在 QGIS 中把 `chengdu_vertices_pgr` 图层显示图层标签为`id`，找到两个节点``和``查找最短路径：
+在 QGIS 中把 `chengdu_vertices_pgr` 图层显示图层标签为`id`，查询两个节点`1152`和`9932`的最短路径：
 
 ```sql
 SELECT seq, id1 AS node, id2 AS edge, cost
@@ -211,16 +211,6 @@ FROM pgr_dijkstra('
 ![成都市最短路查询](/images/postgis-shortest-path/成都市最短路查询.png)
 
 ### 在 QGIS 中显示查询结果
-
-create table line(id serial,the_geom geometry);
-insert into line (the_geom) select ST_MakeLine(ARRAY (select the_geom
-from (SELECT seq, id1 AS node FROM pgr_dijkstra(
-'SELECT  id AS id,
-source::integer,
-target::integer,
-cost::double precision AS cost
-FROM edge_table', 1, 11, false, false))path, edge_table_vertices_pgr p
-where path.node = p.id order by seq));
 
 ```sql
 create table chengdu_path_result(id serial,the_geom geometry);
