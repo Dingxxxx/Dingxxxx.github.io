@@ -23,7 +23,7 @@ tags:
 
 + 建立test数据库并安装相关空间插件
 
-```SQL
+```sql
 CREATE DATABASE test
   WITH OWNER = postgres
        ENCODING = 'UTF8'
@@ -42,7 +42,6 @@ CREATE EXTENSION plpgsql;
 + 创建数据表并插入数据
 
 ```sql
-
 CREATE TABLE edge_table ( id serial,
 dir character varying,
 source integer,
