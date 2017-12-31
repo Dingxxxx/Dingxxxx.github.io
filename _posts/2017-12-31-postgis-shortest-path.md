@@ -21,7 +21,7 @@ tags:
 
 ## 第一个例子
 
-+ 建立test数据库并安装相关空间插件
+### 建立test数据库并安装相关空间插件
 
 ```sql
 CREATE DATABASE test
@@ -39,7 +39,7 @@ CREATE EXTENSION plpgsql;
 ```
 
 
-+ 创建数据表并插入数据
+### 创建数据表并插入数据
 
 ```sql
 CREATE TABLE edge_table ( id serial,
@@ -89,7 +89,7 @@ ELSE '' END;
 
 ![qgis展示](/images/postgis-shortest-path/data_in_qgis.png)
 
-+ 创建格式化拓扑数据
+### 创建格式化拓扑数据
 
 使用`pgrouting`的函数生成`source`和`target`列。
 
@@ -103,7 +103,7 @@ SQL结果为：
 
 执行后生成一个表` edge_table_vertices_pgr`. 其中包含了道路数据的交点，也在 edge_table 表的 `source` 和 `target` 列中表现. 他们是一组点的组合.
 
-+ 计算最短路径
+### 计算最短路径
 
 我们用 pgr_dijkstra 函数计算出, edge_table_vertices_pgr 中点 1 到 11 间的最短距离.
 
@@ -129,7 +129,7 @@ FROM edge_table',
 
 意思为节点 1-11 的最短路径为 `1-2-5-10-11`，经过的路径为 `1-4-10-12`
 
-+ 在 QGis 中展示查询结果
+### 在 QGis 中展示查询结果
 
 由于 QGIS 不支持动态查询数据库，只能够从数据库中读取数据，所以需要将查询结果生成一张数据表存在数据库中，再通过 QGIS 进行展示。
 
