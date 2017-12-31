@@ -115,11 +115,11 @@ Dijkstra 算法可以用来找到两个城市之间的最短路径。
 ```sql
 SELECT seq, id1 AS node, id2 AS edge, cost FROM
 pgr_dijkstra('
-SELECT  id AS id,
-source::integer,
-target::integer,
-cost::double precision AS cost
-FROM edge_table',
+  SELECT  id AS id,
+  source::integer,
+  target::integer,
+  cost::double precision AS cost
+  FROM edge_table',
 1, 11, false, false);
 ```
 
@@ -139,7 +139,7 @@ create table line(id serial,the_geom geometry);
 insert into line (the_geom) select ST_MakeLine(ARRAY (select the_geom
 from (SELECT seq, id1 AS node FROM pgr_dijkstra(
 'SELECT  id AS id,
- source::integer,
+source::integer,
 target::integer,
 cost::double precision AS cost
 FROM edge_table', 1, 11, false, false))path, edge_table_vertices_pgr p
@@ -148,7 +148,99 @@ where path.node = p.id order by seq));
 
 在 QGIS 中加载数据，如图所示：
 
-![dijkstra_result_inQGIS.png](/images/postgis-shortest-path/dijkstra_result_inQGIS.png)
+![dijkstra_result_inQGIS](/images/postgis-shortest-path/dijkstra_result_inQGIS.png)
+
+## 测试成都数据
+
+### 通过 sha2pgsql 导入成都道路数据
+
+![导入成都数据](/images/postgis-shortest-path/导入成都数据.png)
+
+### 生成道路网
+
++ 生成`source`，`target`和`length`字段
+
+```sql
+ALTER TABLE chengdu ADD COLUMN source integer;  
+ALTER TABLE chengdu ADD COLUMN target integer;  
+ALTER TABLE chengdu ADD COLUMN length double precision;
+-- 经纬度距离
+UPDATE chengdu SET length = ST_Length(geom);
+-- 曲面距离
+UPDATE chengdu SET length = ST_LengthSpheroid(geom, 'SPHEROID["WGS 84",6378137,298.257223563]');
+```
+
++ 生成道路网的拓扑节点
+
+确认空间扩展插件已安装：
+
+```sql
+CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_topology;
+CREATE EXTENSION fuzzystrmatch;
+```
+
+生成道路之间的节点， `0.001`和`0.1`为道路节点的容差，不要太大也不要太小：
+
+```sql
+select pgr_createTopology('chengdu',0.001,source:='source',id:='gid',target:='target',the_geom:='geom');
+select pgr_createTopology('chengdu',0.01,source:='source',id:='gid',target:='target',the_geom:='geom');
+```
+
+![生成拓扑结构](/images/postgis-shortest-path/生成拓扑结构.png)
+
+结果生成了一张成都道路网的节点数据表 `chengdu_vertices_pgr`，在QGIS中查看结果：
+
+![成都市道路节点](/images/postgis-shortest-path/成都市道路节点.png)
+
+### 最短路径查询
+
+在 QGIS 中把 `chengdu_vertices_pgr` 图层显示图层标签为`id`，找到两个节点``和``查找最短路径：
+
+```sql
+SELECT seq, id1 AS node, id2 AS edge, cost
+FROM pgr_dijkstra('
+	SELECT gid as id,  
+	source::integer,  
+	target::integer,  
+	length::double precision as cost  
+	FROM chengdu',  
+	1152, 9932, false, false);
+```
+
+![成都市最短路查询](/images/postgis-shortest-path/成都市最短路查询.png)
+
+### 在 QGIS 中显示查询结果
+
+create table line(id serial,the_geom geometry);
+insert into line (the_geom) select ST_MakeLine(ARRAY (select the_geom
+from (SELECT seq, id1 AS node FROM pgr_dijkstra(
+'SELECT  id AS id,
+source::integer,
+target::integer,
+cost::double precision AS cost
+FROM edge_table', 1, 11, false, false))path, edge_table_vertices_pgr p
+where path.node = p.id order by seq));
+
+```sql
+create table chengdu_path_result(id serial,the_geom geometry);
+insert into chengdu_path_result (the_geom)
+select ST_MakeLine(ARRAY (select the_geom
+	from (SELECT seq, id1 AS node, id2 AS edge, cost
+		FROM pgr_dijkstra('
+		SELECT gid as id,  
+		source::integer,  
+		target::integer,  
+		length::double precision as cost  
+		FROM chengdu',  
+		1152, 9932, false, false)) path, chengdu_vertices_pgr p
+	where path.node = p.id order by seq));
+```
+
+在 QGIS 中打开：
+
+![成都最短路结果](/images/postgis-shortest-path/成都最短路结果.png)
+
 
 ## 参考
 
