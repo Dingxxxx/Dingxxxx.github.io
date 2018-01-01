@@ -191,11 +191,11 @@ select pgr_createTopology('chengdu',0.01,source:='source',id:='gid',target:='tar
 
 结果生成了一张成都道路网的节点数据表 `chengdu_vertices_pgr`，在QGIS中查看结果：
 
-设定容差为 0.001:
-![成都市道路节点](/images/postgis-shortest-path/成都市道路节点.png)
-
 设定容差为 0.01:
 ![成都市道路节点0.01](/images/postgis-shortest-path/成都市道路节点_0.01.png)
+
+设定容差为 0.001:
+![成都市道路节点](/images/postgis-shortest-path/成都市道路节点.png)
 
 设定容差为 0.0005:
 ![成都市道路节点0.0005](/images/postgis-shortest-path/成都市道路节点_0.0005.png)
