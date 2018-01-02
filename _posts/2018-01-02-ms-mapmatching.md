@@ -2,7 +2,7 @@
 layout: post
 author: Ding
 title: ms-mapmatching论文提供的数据集
-date: 2017-01-02
+date: 2018-01-02
 categories: GIS
 tags:
 - map matching
@@ -18,7 +18,7 @@ tags:
 
 
 
-##　准备数据
+## 准备数据
 
 ### 道路数据表
 
@@ -38,7 +38,7 @@ VALUES (883991900000,883991900000,883991900001,'1',22.22222222,10, ST_GeomFromTe
 
 在 QGIS 中看一下是否正确插入了数据：
 
-![检查数据](/home/ding/Documents/git/Dingxxxx.github.io/images/map-matching/检查数据.png)
+![检查数据](/images/map-matching/检查数据.png)
 
 
 编写 python 脚本批量插入道路数据到 postgis 数据库中：
@@ -77,11 +77,54 @@ for i in range(len(data)):
 # 一共158166行道路数据
 ```
 
-![道路数据](/home/ding/Documents/git/Dingxxxx.github.io/images/map-matching/道路数据.png)
+![道路数据](/images/map-matching/道路数据.png)
 
 
 ### 轨迹数据
 
 + 原始GPS轨迹数据
 
+先用 QGIS 读取 `gps_data.csv` 文件，然后导出为 shp 文件再通过 shp2psql 工具导入 postgis 数据库。
+
 + 真实轨迹数据
+
+```python
+import psycopg2
+import pandas as pd
+conn = psycopg2.connect(database="test", user="postgres",
+                        password="********", host="127.0.0.1",
+                        port="5432")
+
+cur = conn.cursor()
+
+data = pd.read_csv('ground_truth_path.csv',
+                   sep = '	')
+
+SQL = '''
+CREATE TABLE ms.ground_truth(edge_id bigint, traversed boolean);
+SELECT AddGeometryColumn('ms','ground_truth', 'the_geom',4326,'LINESTRING',2);
+'''
+cur.execute(SQL)
+conn.commit()
+
+insert_query = '''INSERT INTO ms.ground_truth
+VALUES (%s, %s, %s);
+'''
+
+for i in range(len(data)):
+    edge_id = str(data.loc[i][0])
+    traversed = str(data.loc[i][1])
+    cur.execute('SELECT the_geom FROM ms.road WHERE edge_id = %s;', (edge_id,))
+    geom = cur.fetchone()[0]
+    cur.execute(insert_query, (edge_id, traversed, geom))
+    print('line:' + str(i))
+
+conn.commit()
+```
+真实路径如图所示：
+
+![真实路径](/images/map-matching/ground_truth.png)
+
+放大观察细节可以发现 GPS 轨迹点和真实路径的差别：
+
+![路径细节](/images/map-matching/ground_truth_detail.png)
