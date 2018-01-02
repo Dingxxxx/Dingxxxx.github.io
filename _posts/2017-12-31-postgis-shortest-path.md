@@ -3,9 +3,9 @@ layout: post
 author: Ding
 title: 基于postgis的最短路径查询
 date: 2017-12-31
-categories: PostGis
+categories: GIS
 tags:
-- PostGis
+- PostGIS
 - Shortest Path
 ---
 
@@ -183,8 +183,9 @@ CREATE EXTENSION fuzzystrmatch;
 生成道路之间的节点， `0.001`和`0.1`为道路节点的容差，不要太大也不要太小：
 
 ```sql
-select pgr_createTopology('chengdu',0.001,source:='source',id:='gid',target:='target',the_geom:='geom');
-select pgr_createTopology('chengdu',0.01,source:='source',id:='gid',target:='target',the_geom:='geom');
+select pgr_createTopology('chengdu',0.01,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
+select pgr_createTopology('chengdu',0.001,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
+select pgr_createTopology('chengdu',0.0001,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
 ```
 
 ![生成拓扑结构](/images/postgis-shortest-path/生成拓扑结构.png)
