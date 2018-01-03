@@ -161,13 +161,13 @@ where path.node = p.id order by seq));
 + 生成`source`，`target`和`length`字段
 
 ```sql
-ALTER TABLE chengdu ADD COLUMN source integer;  
-ALTER TABLE chengdu ADD COLUMN target integer;  
-ALTER TABLE chengdu ADD COLUMN length double precision;
+ALTER TABLE chengdu.road ADD COLUMN source integer;  
+ALTER TABLE chengdu.road ADD COLUMN target integer;  
+ALTER TABLE chengdu.road ADD COLUMN length double precision;
 -- 经纬度距离
-UPDATE chengdu SET length = ST_Length(geom);
+UPDATE chengdu.road SET length = ST_Length(geom);
 -- 曲面距离
-UPDATE chengdu SET length = ST_LengthSpheroid(geom, 'SPHEROID["WGS 84",6378137,298.257223563]');
+UPDATE chengdu.road SET length = ST_LengthSpheroid(geom, 'SPHEROID["WGS 84",6378137,298.257223563]');
 ```
 
 + 生成道路网的拓扑节点
@@ -183,9 +183,9 @@ CREATE EXTENSION fuzzystrmatch;
 生成道路之间的节点， `0.001`和`0.1`为道路节点的容差，不要太大也不要太小：
 
 ```sql
-select pgr_createTopology('chengdu',0.01,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
-select pgr_createTopology('chengdu',0.001,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
-select pgr_createTopology('chengdu',0.0001,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
+select pgr_createTopology('chengdu.road',0.01,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
+select pgr_createTopology('chengdu.road',0.001,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
+select pgr_createTopology('chengdu.road',0.0005,source:='source',id:='gid',target:='target',the_geom:='geom',clean:='true');
 ```
 
 ![生成拓扑结构](/images/postgis-shortest-path/生成拓扑结构.png)
@@ -212,8 +212,8 @@ FROM pgr_dijkstra('
 	source::integer,  
 	target::integer,  
 	length::double precision as cost  
-	FROM chengdu',  
-	1152, 9932, false, false);
+	FROM chengdu.road',  
+	2577, 3070, false, false);
 ```
 
 ![成都市最短路查询](/images/postgis-shortest-path/成都市最短路查询.png)
@@ -221,8 +221,8 @@ FROM pgr_dijkstra('
 ### 在 QGIS 中显示查询结果
 
 ```sql
-create table chengdu_path_result(id serial,the_geom geometry);
-insert into chengdu_path_result (the_geom)
+create table chengdu.path(id serial,the_geom geometry);
+insert into chengdu.path (the_geom)
 select ST_MakeLine(ARRAY (select the_geom
 	from (SELECT seq, id1 AS node, id2 AS edge, cost
 		FROM pgr_dijkstra('
@@ -230,9 +230,9 @@ select ST_MakeLine(ARRAY (select the_geom
 		source::integer,  
 		target::integer,  
 		length::double precision as cost  
-		FROM chengdu',  
-		1152, 9932, false, false)) path, chengdu_vertices_pgr p
-	where path.node = p.id order by seq));
+		FROM chengdu.road',  
+		2577, 3070, false, false)) p1, chengdu.road_vertices_pgr p2
+	where p1.node = p2.id order by seq));
 ```
 
 在 QGIS 中打开：
