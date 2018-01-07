@@ -79,6 +79,15 @@ for i in range(len(data)):
 
 ![道路数据](/images/map-matching/道路数据.png)
 
+### 生成道路节点
+
+```sql
+ALTER TABLE ms.road ADD COLUMN length double precision;
+UPDATE ms.road SET length = ST_LengthSpheroid(the_geom, 'SPHEROID["WGS 84",6378137,298.257223563]');
+select pgr_createTopology('ms.road',0.0001,source:='source_id',id:='edge_id',target:='target_id',the_geom:='the_geom',clean:='true');
+```
+
+![道路节点](/images/map-matching/道路节点.png)
 
 ### 轨迹数据
 
