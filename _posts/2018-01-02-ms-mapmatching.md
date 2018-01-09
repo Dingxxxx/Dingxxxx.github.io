@@ -22,6 +22,8 @@ tags:
 
 ### 道路数据表
 
++ 创建表格，测试插入一条数据:
+
 ```sql
 DROP TABLE ms.road;
 DROP SCHEMA ms;
@@ -40,8 +42,14 @@ VALUES (883991900000,883991900000,883991900001,'1',22.22222222,10, ST_GeomFromTe
 
 ![检查数据](/images/map-matching/检查数据.png)
 
+由于 `edge_id` 过大只能用`bigint`存储，会导致后面使用pgrouting时出现问题，所以创建一个`serial`类型的`gid`字段。
 
-编写 python 脚本批量插入道路数据到 postgis 数据库中：
+```sql
+CREATE TABLE ms.road(gid serial, edge_id bigint, source_id bigint, target_id bigint, two_way boolean, speed double precision, vertex_count integer);
+SELECT AddGeometryColumn('ms','road', 'the_geom',4326,'LINESTRING',2);
+```
+
++ 编写 python 脚本批量插入道路数据到 postgis 数据库中：
 
 ```python
 import psycopg2
@@ -55,7 +63,8 @@ cur = conn.cursor()
 data = pd.read_csv('road_network.txt',
                    sep = '	')
 
-insert_query = '''INSERT INTO ms.road
+insert_query = '''
+INSERT INTO ms.road(edge_id, source_id, target_id, two_way, speed, vertex_count, the_geom)
 VALUES (%s,%s,%s,%s,%s,%s,ST_GeomFromText(%s, 4326));
 '''
 
@@ -79,15 +88,56 @@ for i in range(len(data)):
 
 ![道路数据](/images/map-matching/道路数据.png)
 
-### 生成道路节点
+### 最短路径查询
+
++ 生成拓扑结构
 
 ```sql
 ALTER TABLE ms.road ADD COLUMN length double precision;
 UPDATE ms.road SET length = ST_LengthSpheroid(the_geom, 'SPHEROID["WGS 84",6378137,298.257223563]');
-select pgr_createTopology('ms.road',0.0001,source:='source_id',id:='edge_id',target:='target_id',the_geom:='the_geom',clean:='true');
+ALTER TABLE ms.road ADD COLUMN source integer;
+ALTER TABLE ms.road ADD COLUMN target integer;
+select pgr_createTopology('ms.road',0.00001,source:='source',id:='gid',target:='target',the_geom:='the_geom',clean:='true');
 ```
 
 ![道路节点](/images/map-matching/道路节点.png)
+
++ 最短路径查询
+
+```sql
+create table ms.path(id serial,the_geom geometry);
+insert into ms.path (the_geom)
+select ST_MakeLine(ARRAY (select the_geom
+	from (SELECT seq, id1 AS node, id2 AS edge, cost
+		FROM pgr_dijkstra('
+		SELECT gid as id,  
+		source::integer,  
+		target::integer,  
+		length::double precision as cost  
+		FROM ms.road',  
+		8894, 40089, false, false)) p1, ms.road_vertices_pgr p2
+	where p1.node = p2.id order by seq));
+```
+
+![最短路径](/images/map-matching/最短路径.png)
+
+上面那个是直接将线的两个端点连接,有点不对,正确做法是将所有线合并:
+
+```sql
+INSERT INTO ms.path (the_geom)
+SELECT ST_LineMerge(ST_Union(the_geom))
+FROM
+	(SELECT seq, id1 AS node, id2 AS edge, cost
+  	FROM pgr_dijkstra('
+  	SELECT gid as id,  
+  	source::integer,  
+  	target::integer,  
+  	length::double precision as cost  
+  	FROM ms.road',  
+  	8894, 40089, false, false)) p1,
+	ms.road p2
+	WHERE p1.edge=p2.gid
+```
 
 ### 轨迹数据
 
