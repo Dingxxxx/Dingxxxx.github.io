@@ -102,21 +102,31 @@ select pgr_createTopology('ms.road',0.00001,source:='source',id:='gid',target:='
 
 ![道路节点](/images/map-matching/道路节点.png)
 
+可以直接用road表中自带的`source_id`,`target_id`作为拓扑结构中的节点:
+
+```sql
+ALTER TABLE ms.road ADD COLUMN length double precision;
+UPDATE ms.road SET length = ST_LengthSpheroid(the_geom, 'SPHEROID["WGS 84",6378137,298.257223563]');
+ALTER TABLE ms.road ADD COLUMN source integer;
+ALTER TABLE ms.road ADD COLUMN target integer;
+UPDATE ms.road SET source = source_id - 883990000000;
+UPDATE ms.road SET target = target_id - 883990000000;
+```
+
 + 最短路径查询
 
 ```sql
 create table ms.path(id serial,the_geom geometry);
 insert into ms.path (the_geom)
 select ST_MakeLine(ARRAY (select the_geom
-	from (SELECT seq, id1 AS node, id2 AS edge, cost
 		FROM pgr_dijkstra('
 		SELECT gid as id,  
 		source::integer,  
 		target::integer,  
 		length::double precision as cost  
 		FROM ms.road',  
-		8894, 40089, false, false)) p1, ms.road_vertices_pgr p2
-	where p1.node = p2.id order by seq));
+		8894, 40089, false, false) p1, ms.road_vertices_pgr p2
+	where p1.id1 = p2.id order by seq));
 ```
 
 ![最短路径](/images/map-matching/最短路径.png)
@@ -126,17 +136,16 @@ select ST_MakeLine(ARRAY (select the_geom
 ```sql
 INSERT INTO ms.path (the_geom)
 SELECT ST_LineMerge(ST_Union(the_geom))
-FROM
-	(SELECT seq, id1 AS node, id2 AS edge, cost
   	FROM pgr_dijkstra('
   	SELECT gid as id,  
   	source::integer,  
   	target::integer,  
   	length::double precision as cost  
   	FROM ms.road',  
-  	8894, 40089, false, false)) p1,
+  	8894, 40089, false, false) p1,
 	ms.road p2
-	WHERE p1.edge=p2.gid
+	WHERE p1.id2=p2.gid
+;
 ```
 
 ### 轨迹数据

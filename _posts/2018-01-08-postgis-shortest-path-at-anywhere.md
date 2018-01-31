@@ -25,23 +25,23 @@ tags:
 起点: `'POINT(-122.205068 47.494881)'`
 
 ```sql
-select edge_id, target, ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT(-122.205068 47.494881)', 4326), 'SPHEROID["WGS 84",6378137,298.257223563]')from ms.road
+select gid, edge_id, target, ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT(-122.205068 47.494881)', 4326), 'SPHEROID["WGS 84",6378137,298.257223563]')from ms.road
 where  ST_DWithin(the_geom, ST_GeomFromText('POINT(-122.205068 47.494881)', 4326), 1000, 't')
 order by ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT(-122.205068 47.494881)', 4326), 'SPHEROID["WGS 84",6378137,298.257223563]') limit 1
 ```
 
-edge_id: `884148301986`, target:`13297`
-
+gid:`111365`, edge_id: `884148301986`, target:`158301192`
+65448 884147201777 157201656
 终点: `'POINT(-122.308542 47.744709)'`
 
 ```sql
-select edge_id, source, ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT(-122.308542 47.744709)', 4326), 'SPHEROID["WGS 84",6378137,298.257223563]')from ms.road
+select gid, edge_id, source, ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT(-122.308542 47.744709)', 4326), 'SPHEROID["WGS 84",6378137,298.257223563]')from ms.road
 where  ST_DWithin(the_geom, ST_GeomFromText('POINT(-122.308542 47.744709)', 4326), 1000, 't')
 order by ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT(-122.308542 47.744709)', 4326), 'SPHEROID["WGS 84",6378137,298.257223563]') limit 1
 ```
 
-edge_id: `884147202987`, source:`108865`
-
+gid:`66657`, edge_id: `884147202987`, source:`157202626`
+67592 884147203923 157201645
 ## 在线上距离起点/终点最近的点
 
 距起点最近的点: `'POINT(-122.20507083074 47.4956182056591)'`
@@ -53,6 +53,13 @@ select ST_AsText(
 	ST_GeomFromText('POINT(-122.205068 47.494881)', 4326)))
 from ms.road where edge_id = 884148301986;
 ```
+"POINT(-122.296573638553 47.7774084579681)"
+select ST_AsText(
+	ST_ClosestPoint(
+	the_geom,
+	ST_GeomFromText('POINT(-122.296568 47.777868)', 4326)))
+from ms.road where edge_id = 884147201777;
+
 
 距终点最近的点: `'POINT(-122.308453940561 47.745015689771)'`
 
@@ -63,6 +70,7 @@ select ST_AsText(
 	ST_GeomFromText('POINT(-122.308542 47.744709)', 4326)))
 from ms.road where edge_id = 884147202987;
 ```
+"POINT(-122.283454 47.8043192625046)"
 
 ### 求最短路径
 
@@ -78,10 +86,10 @@ SELECT seq, id1 AS node, id2 AS edge, cost
   target::integer,  
   length::double precision as cost  
   FROM ms.road',  
-  13297, 108865, false, false)
+  158301192, 157202626, false, false)
 ```
 
-### 拼接几部分成为最终的路径
+## 拼接几部分成为最终的路径
 
 第一部分: 起点---最近路上的点---起点最近的路的target
 
@@ -90,27 +98,25 @@ SELECT seq, id1 AS node, id2 AS edge, cost
 第三部分: 终点最近的路的source---最近路上的点---终点
 
 
-+ 第二部分
+### 第二部分
 
 ```sql
 SELECT ST_AsText(ST_LineMerge(ST_Union(the_geom)))
-	FROM
-	(SELECT seq, id1 AS node, id2 AS edge, cost
   	FROM pgr_dijkstra('
   	SELECT gid as id,  
   	source::integer,  
   	target::integer,  
   	length::double precision as cost  
   	FROM ms.road',  
-  	13297, 108865, false, false)) p1,
+  	13297, 108865, false, false) p1,
 	ms.road p2
-	WHERE p1.edge=p2.gid
+	WHERE p1.id2=p2.gid
 ;
 ```
 
 结果: `'LINESTRING(-122.202209830284 47.4956291913986,-122.207099497318 47.4956104159355,-122.207099497318 47.4938508868217,-122.20744818449 47.4927297234535,-122.207440137863 47.4920806288719,-122.207440137863 47.4918392300606,-122.207429409027 47.4912303686142,- (...)'`
 
-+ 拼接第一,二,三部分:
+### 拼接第一,二,三部分:
 
 ```sql
 -- 暂时不太对
@@ -124,7 +130,7 @@ SELECT  ST_LineMerge(ST_Union(array[
 	  	target::integer,  
 	  	length::double precision as cost  
 	  	FROM ms.road',  
-	  	101826, 67796, false, false)) p1,
+	  	13297, 108865, false, false)) p1,
 		ms.road p2
 		WHERE p1.edge=p2.gid,
   select ST_GeomFromEWKB(the_geom) from ms.road where edge_id = 884148301986
@@ -133,7 +139,7 @@ SELECT  ST_LineMerge(ST_Union(array[
 ]))
 ```
 
-+ 找出起点终点在线上的百分比并截取出相应路段:
+### 找出起点终点在线上的百分比并截取出相应路段:
 
 ```sql
 select ST_Line_Locate_Point(
@@ -200,6 +206,7 @@ from (SELECT seq, id1 AS node, id2 AS edge, cost
 ## 任意两点最短路径函数
 
 ```sql
+drop function _myShortPath(startx float, starty float,endx float,endy float);
 create function _myShortPath(startx float, starty float,endx float,endy float)   
 returns geometry as  
 $body$
@@ -226,13 +233,13 @@ begin
     select the_geom, target into v_startLine, v_startTarget from ms.road where
     ST_DWithin(the_geom, ST_GeomFromText('POINT('|| startx ||' ' || starty ||')', 4326), 1000, 't')
     order by ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT('|| startx ||' ' || starty ||')', 4326),
-	'SPHEROID["WGS 84",6378137,298.257223563]') limit 1;
+	  'SPHEROID["WGS 84",6378137,298.257223563]') limit 1;
 
     --查询离终点最近的线  
     select the_geom, source into v_endLine, v_endSource from ms.road where
     ST_DWithin(the_geom, ST_GeomFromText('POINT('|| endx ||' ' || endy ||')', 4326), 1000, 't')
     order by ST_DistanceSpheroid(the_geom, ST_GeomFromText('POINT('|| endx ||' ' || endy ||')', 4326),
-	'SPHEROID["WGS 84",6378137,298.257223563]') limit 1;
+	  'SPHEROID["WGS 84",6378137,298.257223563]') limit 1;
 
     --如果没找到最近的线，就返回null  
     if (v_startLine is null) or (v_endLine is null) then  
@@ -254,33 +261,39 @@ begin
     --GROUP by id1  
     --ORDER by id1;
 
-    SELECT ST_LineMerge(ST_Union(p2.the_geom))
+    SELECT ST_LineMerge(ST_Union(p2.the_geom)) into v_res
     FROM pgr_dijkstra(
     'SELECT gid as id, source::integer, target::integer, length::double precision as cost FROM ms.road',
     v_startTarget, v_endSource, false, false) p1,
     ms.road p2
     WHERE p1.id2=p2.gid;
 
-
     --如果找不到最短路径，就返回null  
-    if(v_res is null) then  
+    if (v_res is null) then  
         return null;  
     end if;  
 
     --将v_res,v_startLine,v_endLine进行拼接  
     select  st_linemerge(ST_Union(array[v_res,v_startLine,v_endLine])) into v_res;  
 
-    select  ST_Line_Locate_Point(v_res, v_statpoint) into v_perStart;  
-    select  ST_Line_Locate_Point(v_res, v_endpoint) into v_perEnd;  
+    select  ST_LineLocatePoint(v_res, v_statpoint) into v_perStart;  
+    select  ST_LineLocatePoint(v_res, v_endpoint) into v_perEnd;  
 
     --截取v_res  
-    SELECT ST_Line_SubString(v_res,v_perStart, v_perEnd) into v_shPath;  
+    SELECT ST_LineSubstring(v_res,v_perStart, v_perEnd) into v_shPath;  
 
-    return v_shPath;  
-
-
+    return v_res;  
 
 end;  
 $body$  
 LANGUAGE plpgsql VOLATILE STRICT  
 ```
+
+```sql
+insert into ms.path (the_geom)
+select _myShortPath(-122.205068,47.494881,-122.308542,47.744709);
+```
+
+与QGIS内置最短路径工具比较:
+
+![对比](/images/postgis-shortest-path/对比.png)
