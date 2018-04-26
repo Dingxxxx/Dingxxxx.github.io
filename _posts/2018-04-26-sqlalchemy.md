@@ -160,7 +160,7 @@ for u in user_list:
 + 指定字段别名
 
 ```python
-user_list = session.query(Usre.name.label(‘n’)).all() 
+user_list = session.query(Usre.name.label('n')).all() 
 for user in user_list: 
     print(user.n)
 ```
@@ -169,7 +169,7 @@ for user in user_list:
 
 ```python
 from sqlalchemy.orm import aliased 
-user_alias = aliased(User, name=’u_alias’) 
+user_alias = aliased(User, name='u_alias') 
 user_list = session.query(u_alias, u_alias.name).all() 
 for u in user_list: 
     print(u.u_alias, u.name)
@@ -189,14 +189,70 @@ user_list = session.query(User).all()[1:3]
 # equals 
 session.query(User).filter(User.id == 1) # 相等判断 
 # not equals 
-session.query(User).filter(User.name != ‘tom’)# 不等判断
+session.query(User).filter(User.name != 'tom')# 不等判断
 ```
 * 模糊条件 like
 ```python
+session.query(User).filter(User.name.like('%tom%'))
 ```
 * 范围条件 in/not in
 ```python
+# IN 
+session.query(User).filter(User.id.in_([1,2,3,4])) 
+session.query(User).filter(User.name.in_([ 
+    session.query(User.name).filter(User.id.in_[1,2,3,4]) 
+])) 
+# NOT IN 
+session.query(User).filter(~User.id.in_([1,2,3]))
 ```
 * 空值条件 is null/is not null
 ```python
+# IS NULL s
+ession.query(User).filter(User.name == None) 
+session.query(User).filter(User.name.is_(None)) # pep8 
+# IS NOT NULL 
+session.query(User).filter(User.name != None) 
+session.query(User).filter(User.name.isnot(None)) # pep8
+```
+* 与 AND
+```python
+from sqlalchemy import and_ 
+session.query(User).filter(User.name=='tom').filter(User.age==12) 
+session.query(User).filter(User.name=='tom', User.age==12) 
+session.query(User).filter(and_(User.name=='tom', User.age==12))
+```
+
+* 或 OR
+```python
+from sqlalchemy import or_ 
+session.query(User).filter(or_(User.name=='tom', User.name=='jerry'))
+```
+
++ 直接使用SQL语句
+
+```python
+from sqlalchemy import text
+session.query(User).from_statement( 
+    text(‘select * from users where name=:name and age=:age’))
+    .params(name=’tom’, age=12).all()
+```
+
+### 查询结果
+
++ all() 函数返回查询列表
+
+```python
+session.query(User).all()
+```
+
++ filter() 函数返回单项数据的列表生成器
+
+```python
+session.query(User).filter(..)
+```
+
++ one()/one_or_none()/scalar() 返回单独的一个数据对象
+
+```python
+session.query(User).filter(..).one()/one_or_none()/scalar()
 ```
