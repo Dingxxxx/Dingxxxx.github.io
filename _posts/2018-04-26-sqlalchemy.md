@@ -122,7 +122,7 @@ Base.metadata.create_all(engine)
 
 ## 操作数据
 
-###　增加和更新
+### 增加和更新
 
 ```python
 user = User(name="tom", age=18)
@@ -233,8 +233,8 @@ session.query(User).filter(or_(User.name=='tom', User.name=='jerry'))
 ```python
 from sqlalchemy import text
 session.query(User).from_statement( 
-    text(‘select * from users where name=:name and age=:age’))
-    .params(name=’tom’, age=12).all()
+    text('select * from users where name=:name and age=:age'))
+    .params(name='tom', age=12).all()
 ```
 
 ### 查询结果
