@@ -28,7 +28,7 @@ tags: python
 + 如果还是找不到__metaclass__,Python 就会用内置的 type 来创建这个类对象
 
 
-```
+```python
 class Field(object):
 
     def __init__(self, name, column_type):

@@ -18,142 +18,124 @@ tags: python
 
 
 
+## 连接数据库
+使用 sqlalchemy 进行数据库操作，首先我们需要建立一个指定数据库的连接引擎对象建立引擎对象的方式被封装在了`sqlalchemy.create_engine`函数中，通过指定的数据库连接信息就可以进行创建。
 
-
-使用type()可以动态创建一个类。所有的python类也是对象(类对象)，由type类派生。
-
-> type --> 元类 metaclass --> 类对象 class --> 实例 instance
-
-当创建一个类时，会在内存中创建一个类对象:
-
-+ Foo 中有__metaclass__这个属性吗？如果是，Python 会在内存中通过__metaclass__创建一个名字为 Foo 的类对象
-+ 如果 Python 没有找到__metaclass__，它会继续在父类中寻找__metaclass__属性，并尝试做和前面同样的操作
-+ 如果 Python 在任何父类中都找不到__metaclass__，它就会在模块层次中去寻找__metaclass__，并尝试做同样的操作
-+ 如果还是找不到__metaclass__,Python 就会用内置的 type 来创建这个类对象
-
+创建数据库连接引擎时的连接字符串
 
 ```
-class Field(object):
-
-    def __init__(self, name, column_type):
-        self.name = name
-        self.column_type = column_type
-
-    def __str__(self):
-        return '<%s:%s>' % (self.__class__.__name__, self.name)
-    
-class StringField(Field):
-
-    def __init__(self, name):
-        super(StringField, self).__init__(name, 'varchar(100)')
-
-class IntegerField(Field):
-
-    def __init__(self, name):
-        super(IntegerField, self).__init__(name, 'bigint')
-        
-        
-class ModelMetaclass(type):
-
-    def __new__(cls, name, bases, attrs):
-        if name=='Model':
-            return type.__new__(cls, name, bases, attrs)
-        print('Found model: %s' % name)
-        mappings = dict()
-        print(attrs)
-        for k, v in attrs.items():
-            if isinstance(v, Field):
-                print('Found mapping: %s ==> %s' % (k, v))
-                mappings[k] = v
-        for k in mappings.keys():
-            attrs.pop(k)
-        attrs['__mappings__'] = mappings # 保存属性和列的映射关系
-        attrs['__table__'] = name # 假设表名和类名一致
-        return type.__new__(cls, name, bases, attrs)
-    
-    
-class Model(dict, metaclass=ModelMetaclass):
-
-    def __init__(self, **kw):
-        print(kw)
-        super(Model, self).__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r"'Model' object has no attribute '%s'" % key)
-
-    def save(self):
-        fields = []
-        params = []
-        args = []
-        for k, v in self.__mappings__.items():
-            fields.append(v.name)
-            params.append('?')
-            args.append(getattr(self, k, None))
-        sql = 'insert into %s (%s) values (%s)' % (self.__table__, ','.join(fields), ','.join(params))
-        print('SQL: %s' % sql)
-        print('ARGS: %s' % str(args))
-        
-class User(Model):
-    # 定义类的属性到列的映射：
-    id = IntegerField('id')
-    name = StringField('username')
-    email = StringField('email')
-    password = StringField('password')
+dialect[+driver]://user:password@host/dbname[?key=value..]
 ```
 
-用元类创建类对象时，__new__方法先于被创建类的__init__方法被调用。
+`echo`选项表示会自动打印所有sql语句。
 
-当创建
+```python
+from sqlalchemy import create_engine
+# mysql
+# 默认情况（即使用mysql-python）
+engine = create_engine("mysql://username:password@hostname/database", encoding="utf-8", echo=True)
+# 使用mysql-python
+engine = create_engine('mysql+mysqldb://username:password@hostname/database')
+# 使用MySQL-connector-python
+engine = create_engine('mysql+mysqlconnector://username:password@hostname/database')
+# 使用OurSQL
+engine = create_engine('mysql+oursql://username:password@hostname/database')
 
-```
-u = User(id=12345, name='Michael', email='test@orm.org', password='my-pwd')
-```
+# postgresql
+# 默认情况(即使用psycopg2)
+engine = create_engine("postgresql://username:password@hostname/database")
+# 使用psycopg2
+engine = create_engine('postgresql+psycopg2://username:password@hostname/database')
+# 使用pg8000
+engine = create_engine('postgresql+pg8000://username:password@hostname/database')
 
-由于 Model 是 User 类父类，而 Model 类使用了元类，故先调用的方法为元类中 new()。
+# sqlite 
+# 基于文件的数据库，URL 形式是 sqlite://<nohostname>/<path>
+# 在Unix/Mac
+engine = create_engine('sqlite:////absolute/path/to/foo.db')
+# 在Windows
+engine = create_engine('sqlite:///C:\\path\\to\\foo.db')
+# 在Windows 中使用原始字符串
+engine = create_engine(r'sqlite:///C:\path\to\foo.db')
+# 使用内存
+engine = create_engine('sqlite://')
+engine = create_engine('sqlite:///:memory:')
 
-以 id 为例，在 mappings 字典中此时建立的应该是 {id:IntegerField('id')}。假设没有 attrs.pop() 那么在调用 u.save()时，getattr()首先从类的属性或者父类的属性中找，只有查询不到时，才会到 getattrs 中查找。由于没有把原本的 id 关键字弹出，故 getattr 便能从类的属性 id=IntegerField 得到 IntegerField。一旦有了 attrs.pop() 在类中就查询不到相应的属性，那么就要调用 getattrs 而返回值是 self[k]。
-
-由于 self 不是指类而是类的实例，所以能够成功返回，构建实例时创建 id 的值 12345，这样就正确得到传入的实参值。
-
-### super 和 mro()
-
-
-### 类属性和实例属性的区别
-
-<https://www.cnblogs.com/wgDream/p/6749643.html>
-
-+ 类属性
-
-在类定义时直接指定的属性 (不是在__init__方法中)
-
-```
-class Test: 
-    class_attribute1="attr-value" 
-```
-
-+ 实例属性
-
-在__init__方法中添加的属性, 在其他位置添加也是可以的, 实际是通过 setattr 内置函数 (调用__setattr__) 完成, 另外也可以直接修改__dict__属性手动添加
-
-+ 属性的访问顺序
-
-```
-class Test(object):
-    name = 'python'
-
-a = Test()
-a.name = 'python good'  # 通过实例进行修改
-print Test.name
-print a.name
+# oracle
+# 默认情况（即使用cx_oracle）
+engine = create_engine('oracle://scott:tiger@127.0.0.1:1521/sidname')
+# 使用cx_oracle
+engine = create_engine('oracle+cx_oracle://scott:tiger@tnsname')
 ```
 
-发现类的属性没有修改，而实例的属性则修改成功了。
 
-｀instance.attr_name｀ 访问实例属性时, 首先在｀instance.__dict__｀实例属性中查找, 如果找到返回对应值, 否则在
-｀instance.__class__.__dict__｀中查找, 也就是在类属性中查找, 如果找到, 返回对应值, 否则产生attributeError 异常。
+## 连接会话
 
-而当我试图用实例去修改一个在类中不可变的属性的时候，我实际上并没有修改，而是在我的实例中创建了这个属性。而当我再次访问这个属性的时候，我实例中有，就不用去类中寻找了。
+```python
+# 引入创建session连接会话需要的处理模块 
+from sqlalchemy.orm import sessionmaker 
+# 创建一个连接会话对象；需要指定是和那个数据库引擎之间的会话 
+Session = sessionmaker()
+Session.configure(bind=engine)
+session = Session()
+```
 
+## 创建对象
+我们的程序中的对象要使用 sqlalchemy 的管理，实现对象的 orm 操作，就需要按照框架指定的方式进行类型的创建操作，sqlalchemy 封装了基础类的声明操作和字段属性的定义限制方式，开发人员要做的事情就是引入需要的模块并在创建对象的时候使用它们即可。
+
+基础类封装在 sqlalchemy.ext.declarative.declarative_base 模块中
+字段属性的定义封装在 sqlalchemy 模块中，通过 sqlalchemy.Column 定义属性，通过封装的 Integer、String、Float 等定义属性的限制。
+
+### 基础类
+
+```python
+# 引入需要的模块 
+from sqlalchemy.ext.declarative import declarative_base 
+# 创建基础类 
+Base = declarative_base()
+```
+
+### 创建数据类
+
+数据类继承于基础类，通过`__tablename__`和数据库中的数据表建立关联关系。
+
+```python
+# 引入需要的模块 
+from sqlalchemy import Column, String, Integer 
+# 创建用户类型 
+class User(Base): 
+    # 定义和指定数据库表之间的关联 
+    __tablename__ = "user"
+    # 创建字段类型 
+    id = Column(Integer, primary_key=True) 
+    name = Column(String(50)) 
+    age = Column(Integer)
+```
+
+### 完成数据映射
+
+检查数据库中是否有需要创建的表，不存在的话创建对应的表。
+
+```python
+Base.metadata.create_all(engine)
+```
+
+## 操作数据
+
+###　增加和更新
+
+```python
+user = User(name="tom", age=18)
+session.add(user)
+session.commit()
+```
+
+### 查询对象 Query
+Session 是 sqlalchemy 和数据库交互的桥梁，Session 提供了一个 Query 对象实现数据库中数据的查询操作。
+
++ 常规查询 
+```python
+user_list = session.query(User) 
+for user in user_list: 
+    print(user.name)
+```
