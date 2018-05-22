@@ -29,9 +29,10 @@ dialect[+driver]://user:password@host/dbname[?key=value..]
 
 `echo`选项表示会自动打印所有sql语句。
 
+### mysql
+
 ```python
 from sqlalchemy import create_engine
-# mysql
 # 默认情况（即使用mysql-python）
 engine = create_engine("mysql://username:password@hostname/database", encoding="utf-8", echo=True)
 # 使用mysql-python
@@ -40,16 +41,22 @@ engine = create_engine('mysql+mysqldb://username:password@hostname/database')
 engine = create_engine('mysql+mysqlconnector://username:password@hostname/database')
 # 使用OurSQL
 engine = create_engine('mysql+oursql://username:password@hostname/database')
+```
 
-# postgresql
+### postgresql
+
+```python
 # 默认情况(即使用psycopg2)
 engine = create_engine("postgresql://username:password@hostname/database")
 # 使用psycopg2
 engine = create_engine('postgresql+psycopg2://username:password@hostname/database')
 # 使用pg8000
 engine = create_engine('postgresql+pg8000://username:password@hostname/database')
+```
 
-# sqlite 
+### sqlite
+
+```python 
 # 基于文件的数据库，URL 形式是 sqlite://<nohostname>/<path>
 # 在Unix/Mac
 engine = create_engine('sqlite:////absolute/path/to/foo.db')
@@ -60,14 +67,16 @@ engine = create_engine(r'sqlite:///C:\path\to\foo.db')
 # 使用内存
 engine = create_engine('sqlite://')
 engine = create_engine('sqlite:///:memory:')
+```
 
-# oracle
+### oracle
+
+```python
 # 默认情况（即使用cx_oracle）
 engine = create_engine('oracle://scott:tiger@127.0.0.1:1521/sidname')
 # 使用cx_oracle
 engine = create_engine('oracle+cx_oracle://scott:tiger@tnsname')
 ```
-
 
 ## 连接会话
 
@@ -192,10 +201,12 @@ session.query(User).filter(User.id == 1) # 相等判断
 session.query(User).filter(User.name != 'tom')# 不等判断
 ```
 * 模糊条件 like
+
 ```python
 session.query(User).filter(User.name.like('%tom%'))
 ```
 * 范围条件 in/not in
+
 ```python
 # IN 
 session.query(User).filter(User.id.in_([1,2,3,4])) 
@@ -206,6 +217,7 @@ session.query(User).filter(User.name.in_([
 session.query(User).filter(~User.id.in_([1,2,3]))
 ```
 * 空值条件 is null/is not null
+
 ```python
 # IS NULL s
 ession.query(User).filter(User.name == None) 
@@ -215,6 +227,7 @@ session.query(User).filter(User.name != None)
 session.query(User).filter(User.name.isnot(None)) # pep8
 ```
 * 与 AND
+
 ```python
 from sqlalchemy import and_ 
 session.query(User).filter(User.name=='tom').filter(User.age==12) 
@@ -223,6 +236,7 @@ session.query(User).filter(and_(User.name=='tom', User.age==12))
 ```
 
 * 或 OR
+
 ```python
 from sqlalchemy import or_ 
 session.query(User).filter(or_(User.name=='tom', User.name=='jerry'))
@@ -255,4 +269,96 @@ session.query(User).filter(..)
 
 ```python
 session.query(User).filter(..).one()/one_or_none()/scalar()
+```
+
+
+## 定义关系
+
+### 一对多关系
+
+一篇文章对应一个用户，一个用户对应多篇文章。
+
+```python
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(64), nullable=False, index=True)
+    password = Column(String(64), nullable=False)
+    email = Column(String(64), nullable=False, index=True)
+    articles = relationship('Article')
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.username)
+
+
+class Article(Base):
+    __tablename__ = 'articles'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255), nullable=False, index=True)
+    content = Column(Text)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    author = relationship('User')
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.title)
+```
+
+其中`ForeignKey`函数定义了外键关系，`relationship`描述了用户与文章的双向关系，也可以用如下方式定一双想关系：
+
+```python
+articles = relationship('Article', backref='author')
+```
+
+### 一对一关系
+
+在 User 中我们只定义了几个必须的字段， 但通常用户还有很多其他信息，但这些信息可能不是必须填写的，我们可以把它们放到另一张 UserInfo 表中，这样User 和 UserInfo 就形成了一对一的关系。你可能会奇怪一对一关系为什么不在一对多关系前面？那是因为一对一关系是基于一对多定义的，只需要是添加`uselist=False`：
+
+```python
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(64), nullable=False, index=True)
+    password = Column(String(64), nullable=False)
+    email = Column(String(64), nullable=False, index=True)
+    articles = relationship('Article', backref='author')
+    userinfo = relationship('UserInfo', backref='user', uselist=False)
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.username)
+
+
+class UserInfo(Base):
+    __tablename__ = 'userinfos'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64))
+    qq = Column(String(11))
+    phone = Column(String(11))
+    link = Column(String(64))
+    user_id = Column(Integer, ForeignKey('users.id'))
+```
+
+### 多对多关系
+
+一遍博客通常有一个分类，好几个标签。标签与博客之间就是一个多对多的关系。多对多关系不能直接定义，需要分解成俩个一对多的关系，为此，需要一张额外的表来协助完成：
+
+```python
+article_tag = Table(
+    'article_tag', Base.metadata,
+    Column('article_id', Integer, ForeignKey('articles.id')),
+    Column('tag_id', Integer, ForeignKey('tags.id'))
+)
+
+
+class Tag(Base):
+    __tablename__ = 'tags'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64), nullable=False, index=True)
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.name)
 ```
