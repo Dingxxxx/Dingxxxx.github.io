@@ -3,8 +3,12 @@ layout: post
 author: Ding
 title:  "Cartopy Document--读取shapefile文件"
 date:   2017-09-13
-categories: python cartopy
-tags: python cartopy matplotlib visualising
+categories: Python
+tags: 
+- Python 
+- cartopy 
+- matplotlib 
+- visualising
 ---
 
 * content

@@ -3,8 +3,12 @@ layout: post
 author: Ding
 title:  "Cartopy Gallery"
 date:   2017-09-15
-categories: python
-tags: python cartopy matplotlib visualising
+categories: Python
+tags: 
+- Python 
+- cartopy 
+- matplotlib 
+- visualising
 ---
 
 * content

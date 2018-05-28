@@ -3,9 +3,9 @@ layout: post
 author: Ding
 title: 配置selenium和chromeDriver
 date: 2017-11-10
-categories: python
+categories: Python
 tags:
-- python
+- Python
 - scrapy
 ---
 

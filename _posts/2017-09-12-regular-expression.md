@@ -3,8 +3,11 @@ layout: post
 author:  Ding
 title:  "正则表达式简介"
 date:  2017-09-12
-categories: python
-tags: Linux python Regular Expression
+categories: Python
+tags: 
+- Linux 
+- Python 
+- Regular Expression
 ---
 
 * content

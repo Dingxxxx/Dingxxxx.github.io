@@ -3,7 +3,7 @@ layout: post
 author: Ding
 title: TensorFlow简介
 date: 2017-08-03T00:00:00.000Z
-categories: python
+categories: Python
 tags: TensorFlow
 ---
 
