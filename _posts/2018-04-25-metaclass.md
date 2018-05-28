@@ -3,8 +3,8 @@ layout: post
 author: Ding
 title:  "学习python metaclass 元类"
 date:   2018-04-25
-categories: python 
-tags: python 
+categories: Python
+tags: Python 
 ---
 
 * content
