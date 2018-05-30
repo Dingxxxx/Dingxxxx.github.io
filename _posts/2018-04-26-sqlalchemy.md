@@ -3,8 +3,8 @@ layout: post
 author: Ding
 title:  "使用sqlalchemy封装数据库"
 date:   2018-04-26
-categories: python 
-tags: python 
+categories: Python 
+tags: Python 
 ---
 
 * content
